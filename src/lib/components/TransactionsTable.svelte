@@ -64,17 +64,17 @@
         return sortDirection === "asc" ? result : -result;
     }
 
-    const mapTransactions = () => {
-        return transactions.map((t) => t.category).filter(Boolean).sort();
-    }
-
     $: categories = [
         "All",
-        ...Array.from(new Set(mapTransactions()))
-    ]
+        ...Array.from(
+          new Set(
+            transactions.flatMap(t => t.categories)
+          )
+        ).sort()
+    ];
 
     $: filteredTransactions = transactions.filter((tx) => {
-        const matchesCategory: boolean = selectedCategory === "All" || selectedCategory === tx.category;
+        const matchesCategory: boolean = selectedCategory === "All" || tx.categories.includes(selectedCategory);
 
         const q = normalize(search);
 
@@ -82,7 +82,7 @@
             !q ||
             normalize(tx.description).includes(q) ||
             normalize(tx.name).includes(q) ||
-            normalize(tx.category).includes(q) ||
+            tx.categories.some(c => normalize(c).includes(q)) ||
             normalize(tx.account).includes(q) ||
             normalize(tx.amount.toString()).includes(q) ||
             normalize(tx.date.toString()).includes(q);
@@ -158,10 +158,13 @@
                     <div class="description">{tx.description}</div>
                 </td>
                 <td>
-                    <!-- <span class={`badge ${getCategoryClass(tx.category)}`}> -->
-                    <span>
-                        Category
-                    </span>
+                     <div class="category-list">
+                      {#each tx.categories as category}
+                        <span class={`badge ${getCategoryClass(category)}`}>
+                          {category}
+                        </span>
+                      {/each}
+                     </div>
                 </td>
                 {#if showAccount}
                     <td>{tx.account ?? "-"}</td>

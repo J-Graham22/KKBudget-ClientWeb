@@ -4,6 +4,6 @@ export default interface Transaction {
     description: string,
     amount: number,
     date: string | Date,
-    category: string,
+    categories: string[],
     account: string,
 }
