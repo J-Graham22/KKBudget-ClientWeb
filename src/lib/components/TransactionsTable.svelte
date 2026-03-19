@@ -1,13 +1,23 @@
 <script lang="ts">
     import type Transaction from "$lib/types/Transaction";
-  import { normalize } from "path";
     import { createEventDispatcher } from "svelte";
 
-    export let transactions: Transaction[] = [];
+    interface TransactionsTableProps {
+      transactions: Transaction[],
+      showAccount: boolean,
+      showSearch: boolean, 
+      showCategoryFilter: boolean,
+    }
 
-    export let showAccount: boolean = true;
-    export let showSearch: boolean = true;
-    export let showCategoryFilter: boolean = true;
+    let { 
+      transactions = [],
+      showAccount = true,
+      showSearch = true,
+      showCategoryFilter = true,
+     }: TransactionsTableProps = $props();
+
+    const normalize = (value: unknown) =>
+      String(value ?? "").toLowerCase().trim();
 
     const dispatchEvent = createEventDispatcher<{
         edit: { transaction: Transaction };
@@ -30,15 +40,48 @@
       new Date(date).toLocaleDateString();
 
     const toggleSort = (key: typeof sortKey) => {
+        console.log("toggle sort clikced");
         if (sortKey == key) {
             sortDirection = sortDirection === "asc" ? "desc" : "asc";
         } else {
             sortKey = key;
             sortDirection = key === "date" ? "desc" : "asc";
         }
+        console.log(sortKey);
+        console.log(sortDirection);
     };
 
-    const compareTransactions = (a: Transaction, b: Transaction) => {
+
+    // $: categories = [
+    let categories = $state([
+        "All",
+        ...Array.from(
+          new Set(
+            transactions.flatMap(t => t.categories)
+          )
+        ).sort()
+    ]);
+
+    // $: filteredTransactions = transactions.filter((tx) => {
+    let filteredTransactions = $derived(transactions.filter((tx) => {
+        const matchesCategory: boolean = selectedCategory === "All" || tx.categories.includes(selectedCategory);
+
+        const q = normalize(search);
+
+        const matchSearch: boolean = 
+            !q ||
+            normalize(tx.description).includes(q) ||
+            normalize(tx.name).includes(q) ||
+            tx.categories.some(c => normalize(c).includes(q)) ||
+            normalize(tx.account).includes(q) ||
+            normalize(tx.amount.toString()).includes(q) ||
+            normalize(tx.date.toString()).includes(q);
+
+        return matchSearch && matchesCategory;
+    }));
+
+    // $: sortedTransactions = [...filteredTransactions].sort(compareTransactions);
+    let sortedTransactions = $derived([...filteredTransactions].sort((a: Transaction, b: Transaction) => {
         let aVal: unknown = a[sortKey as keyof Transaction];      
         let bVal: unknown = b[sortKey as keyof Transaction];      
 
@@ -62,35 +105,7 @@
         const result = aNum - bNum;
 
         return sortDirection === "asc" ? result : -result;
-    }
-
-    $: categories = [
-        "All",
-        ...Array.from(
-          new Set(
-            transactions.flatMap(t => t.categories)
-          )
-        ).sort()
-    ];
-
-    $: filteredTransactions = transactions.filter((tx) => {
-        const matchesCategory: boolean = selectedCategory === "All" || tx.categories.includes(selectedCategory);
-
-        const q = normalize(search);
-
-        const matchSearch: boolean = 
-            !q ||
-            normalize(tx.description).includes(q) ||
-            normalize(tx.name).includes(q) ||
-            tx.categories.some(c => normalize(c).includes(q)) ||
-            normalize(tx.account).includes(q) ||
-            normalize(tx.amount.toString()).includes(q) ||
-            normalize(tx.date.toString()).includes(q);
-
-        return matchSearch && matchesCategory;
-    });
-
-    $: sortedTransactions = [...filteredTransactions].sort(compareTransactions);
+    }));
 
     const onEdit = (tx: Transaction) => {
         dispatchEvent("edit", { transaction: tx})
@@ -103,6 +118,8 @@
     const onRowClicked = (tx: Transaction) => {
         dispatchEvent("rowClick", { transaction: tx})
     };
+
+
 </script>
  
 <div class="table-container">
@@ -117,27 +134,27 @@
         </th>
 
         <th>
-            <button type="button" on:click={() => toggleSort("date")}>
+            <button type="button" on:click={() => toggleSort("description")}>
                 Description
-              {#if sortKey === "date"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
+              {#if sortKey === "description"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
             </button>
         </th>
         <th>
-            <button type="button" on:click={() => toggleSort("date")}>
+            <button type="button" on:click={() => toggleSort("category")}>
                 Category
-              {#if sortKey === "date"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
+              {#if sortKey === "category"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
             </button>
         </th>
         <th>
-            <button type="button" on:click={() => toggleSort("date")}>
+            <button type="button" on:click={() => toggleSort("account")}>
                 Account
-              {#if sortKey === "date"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
+              {#if sortKey === "account"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
             </button>
         </th>
         <th class="amount">
-            <button type="button" on:click={() => toggleSort("date")}>
+            <button type="button" on:click={() => toggleSort("amount")}>
                 Amount
-              {#if sortKey === "date"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
+              {#if sortKey === "amount"}{sortDirection === "asc" ? " ↑" : " ↓"}{/if}
             </button>
         </th>
 
@@ -160,7 +177,8 @@
                 <td>
                      <div class="category-list">
                       {#each tx.categories as category}
-                        <span class={`badge ${getCategoryClass(category)}`}>
+                        <!-- <span class={`badge ${getCategoryClass(category)}`}> -->
+                        <span>
                           {category}
                         </span>
                       {/each}

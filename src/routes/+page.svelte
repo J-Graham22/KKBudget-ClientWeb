@@ -2,7 +2,7 @@
     import type Transaction from "$lib/types/Transaction";
     import TransactionsTable from "$lib/components/TransactionsTable.svelte";
 
-    const transactions: Transaction[] = [
+    const testTransactions: Transaction[] = [
     {
       id: 1,
       date: "2026-03-01",
@@ -36,5 +36,10 @@
 <div>
     <h1>Welcome to SvelteKit</h1>
     <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-    <TransactionsTable {transactions}/>
+    <TransactionsTable 
+      transactions = {testTransactions}
+      showAccount =  {true}
+      showSearch =  {true}
+      showCategoryFilter = {true}
+    />
 </div>
