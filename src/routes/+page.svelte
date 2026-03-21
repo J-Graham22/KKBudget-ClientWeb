@@ -1,6 +1,7 @@
 <script lang="ts">
     import type Transaction from "$lib/types/Transaction";
     import TransactionsTable from "$lib/components/TransactionsTable.svelte";
+    import CategoryBar from "$lib/components/CategoryBar.svelte";
 
     const testTransactions: Transaction[] = [
     {
@@ -41,5 +42,10 @@
       showAccount =  {true}
       showSearch =  {true}
       showCategoryFilter = {true}
+    />
+    <CategoryBar
+      categoryName = {"Required"}
+      allotedAmount = {100.0}
+      currentAmount = {33.0}
     />
 </div>
