@@ -25,10 +25,10 @@
         rowClick: { transaction: Transaction };
     }>();
   
-    let sortKey: keyof Transaction | "date" | "amount" | "description" | "category" = "date";
-    let sortDirection: "asc" | "desc" = "asc";    
-    let selectedCategory: string = "All";
-    let search: string = "";
+    let sortKey: keyof Transaction | "date" | "amount" | "description" | "category" = $state("date");
+    let sortDirection: "asc" | "desc" = $state("asc");
+    let selectedCategory: string = $state("All");
+    let search: string = $state("");
 
     const formatCurrency = (amount: number) =>
       new Intl.NumberFormat("en-US", {
@@ -40,7 +40,6 @@
       new Date(date).toLocaleDateString();
 
     const toggleSort = (key: typeof sortKey) => {
-        console.log("toggle sort clikced");
         if (sortKey == key) {
             sortDirection = sortDirection === "asc" ? "desc" : "asc";
         } else {
@@ -53,14 +52,14 @@
 
 
     // $: categories = [
-    let categories = $state([
+    let categories = [
         "All",
         ...Array.from(
           new Set(
             transactions.flatMap(t => t.categories)
           )
         ).sort()
-    ]);
+    ];
 
     // $: filteredTransactions = transactions.filter((tx) => {
     let filteredTransactions = $derived(transactions.filter((tx) => {
@@ -93,6 +92,27 @@
         if (sortKey == "amount") {
             aVal = a.amount;
             bVal = b.amount;
+        }
+
+        if (sortKey == "category") {
+            let aCategories = a.categories;
+            let bCategories = b.categories;
+
+            if (aCategories.length != bCategories.length) {
+                const result = aCategories.length - bCategories.length;
+                return sortDirection === "asc" ? -result : result;
+            } else {
+                const aSorted = aCategories.sort();
+                const bSorted = bCategories.sort();
+
+                for(let i = 0; i < aSorted.length; i++) {
+                  const result = aSorted[i].localeCompare(bSorted[i]);
+                  if (result != 0) {
+                    return sortDirection === "asc" ? result : -result;
+                  }
+                }
+                return 0;
+            }
         }
 
         if (typeof aVal === "string" && typeof bVal === "string") {
