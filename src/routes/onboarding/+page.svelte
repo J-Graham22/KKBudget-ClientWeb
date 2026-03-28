@@ -57,7 +57,25 @@
 </script>
 
 <div>
-
+    {#if step === "welcome"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "welcome"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "user"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "household"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "accounts"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "firstBudget"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "categories"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "otherUsers"}
+        <WelcomeStep on:next={next}/>
+    {:else if step === "complete"}
+        <CompleteStep {onboarding}/>
+    {/if}
 </div>
 
 <style>
