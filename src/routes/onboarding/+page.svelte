@@ -1,5 +1,6 @@
 <script lang="ts">
-    import AccountStep from "$lib/components/onboarding/AccountStep.svelte";
+    import CategoryBar from "$lib/components/CategoryBar.svelte";
+import AccountStep from "$lib/components/onboarding/AccountStep.svelte";
     import BudgetStep from "$lib/components/onboarding/BudgetStep.svelte";
     import CategoriesStep from "$lib/components/onboarding/CategoriesStep.svelte";
     import CompleteStep from "$lib/components/onboarding/CompleteStep.svelte";
@@ -59,20 +60,18 @@
 <div>
     {#if step === "welcome"}
         <WelcomeStep on:next={next}/>
-    {:else if step === "welcome"}
-        <WelcomeStep on:next={next}/>
     {:else if step === "user"}
-        <WelcomeStep on:next={next}/>
+        <ProfileStep on:next={next}/>
     {:else if step === "household"}
-        <WelcomeStep on:next={next}/>
+        <AAAAHHHH on:next={next}/>
     {:else if step === "accounts"}
-        <WelcomeStep on:next={next}/>
+        <AccountStep on:next={next}/>
     {:else if step === "firstBudget"}
-        <WelcomeStep on:next={next}/>
+        <BudgetStep on:next={next}/>
     {:else if step === "categories"}
-        <WelcomeStep on:next={next}/>
+        <CategoriesStep on:next={next}/>
     {:else if step === "otherUsers"}
-        <WelcomeStep on:next={next}/>
+        <on:next={next}/>
     {:else if step === "complete"}
         <CompleteStep {onboarding}/>
     {/if}
